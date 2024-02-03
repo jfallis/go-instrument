@@ -3,6 +3,7 @@ package processor
 import (
 	"go/ast"
 	"go/token"
+	"strings"
 
 	"golang.org/x/tools/go/ast/astutil"
 )
@@ -18,19 +19,27 @@ type FunctionSelector interface {
 	AcceptFunction(functionName string) bool
 }
 
-// BasicSpanName is common notation of <class>.<method> or <pkg>.<func>
-func BasicSpanName(receiver, function string) string {
-	if receiver == "" {
-		return function
+func ExtendedSpanName(name ...string) string {
+	if len(name) == 0 {
+		return ""
 	}
-	return receiver + "." + function
+
+	// remove empty strings
+	s := make([]string, 0, len(name))
+	for _, v := range name {
+		if v != "" {
+			s = append(s, v)
+		}
+	}
+
+	return strings.Join(s, ".")
 }
 
 // Processor traverses AST, collects details on funtions and methods, and invokes Instrumenter
 type Processor struct {
 	Instrumenter     Instrumenter
 	FunctionSelector FunctionSelector
-	SpanName         func(receiver, function string) string
+	SpanName         func(name ...string) string
 	ContextName      string
 	ContextPackage   string
 	ContextType      string
@@ -59,6 +68,18 @@ func (p *Processor) methodReceiverTypeName(spec ast.FuncDecl) string {
 		}
 	}
 	return ""
+}
+
+func (p *Processor) packageName(c *astutil.Cursor) string {
+	if c.Node() != nil || c.Name() != "Doc" {
+		return ""
+	}
+	f, ok := c.Parent().(*ast.File)
+	if !ok && f.Name == nil {
+		return ""
+	}
+
+	return f.Name.Name
 }
 
 func (p *Processor) functionName(spec ast.FuncDecl) string {
@@ -113,11 +134,15 @@ func (p *Processor) isError(e ast.Field) bool {
 }
 
 func (p *Processor) Process(fset *token.FileSet, file *ast.File) error {
+	var packageName string
 	var patches []patch
 
 	astutil.Apply(file, nil, func(c *astutil.Cursor) bool {
 		if c == nil {
 			return true
+		}
+		if packageName == "" {
+			packageName = p.packageName(c)
 		}
 
 		fn, ok := c.Node().(*ast.FuncDecl)
@@ -129,8 +154,6 @@ func (p *Processor) Process(fset *token.FileSet, file *ast.File) error {
 		if !p.FunctionSelector.AcceptFunction(fname) {
 			return true
 		}
-
-		spanName := p.SpanName(p.methodReceiverTypeName(*fn), fname)
 
 		hasContext := false
 		hasError := false
@@ -159,6 +182,7 @@ func (p *Processor) Process(fset *token.FileSet, file *ast.File) error {
 			return true
 		}
 
+		spanName := p.SpanName(packageName, p.methodReceiverTypeName(*fn), fname)
 		ps := p.Instrumenter.PrefixStatements(spanName, hasError)
 		patches = append(patches, patch{pos: fn.Body.Pos(), stmts: ps})
 

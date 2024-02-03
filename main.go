@@ -75,7 +75,7 @@ func main() {
 	p := processor.Processor{
 		Instrumenter:     instrumenter,
 		FunctionSelector: functionSelector,
-		SpanName:         processor.BasicSpanName,
+		SpanName:         processor.ExtendedSpanName,
 		ContextName:      "ctx",
 		ContextPackage:   "context",
 		ContextType:      "Context",

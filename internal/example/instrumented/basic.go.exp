@@ -9,7 +9,7 @@ import (
 type Cat struct{}
 
 func (s Cat) Name(ctx context.Context) (name string, err error) {
-	ctx, span := otel.Tracer("app").Start(ctx, "Cat.Name")
+	ctx, span := otel.Tracer("app").Start(ctx, "example.Cat.Name")
 	defer span.End()
 	defer func() {
 		if err != nil {
@@ -24,7 +24,7 @@ func (s Cat) Name(ctx context.Context) (name string, err error) {
 type Apple struct{}
 
 func (s *Apple) MethodWithPointerReciver(ctx context.Context, a int) (err error) {
-	ctx, span := otel.Tracer("app").Start(ctx, "Apple.MethodWithPointerReciver")
+	ctx, span := otel.Tracer("app").Start(ctx, "example.Apple.MethodWithPointerReciver")
 	defer span.End()
 	defer func() {
 		if err != nil {
@@ -37,7 +37,7 @@ func (s *Apple) MethodWithPointerReciver(ctx context.Context, a int) (err error)
 }
 
 func (s Apple) MethodWithValueReciver(ctx context.Context, a int) (err error) {
-	ctx, span := otel.Tracer("app").Start(ctx, "Apple.MethodWithValueReciver")
+	ctx, span := otel.Tracer("app").Start(ctx, "example.Apple.MethodWithValueReciver")
 	defer span.End()
 	defer func() {
 		if err != nil {
@@ -50,7 +50,7 @@ func (s Apple) MethodWithValueReciver(ctx context.Context, a int) (err error) {
 }
 
 func (*Apple) MethodWithPointerReciverUnnamed(ctx context.Context, a int) (err error) {
-	ctx, span := otel.Tracer("app").Start(ctx, "Apple.MethodWithPointerReciverUnnamed")
+	ctx, span := otel.Tracer("app").Start(ctx, "example.Apple.MethodWithPointerReciverUnnamed")
 	defer span.End()
 	defer func() {
 		if err != nil {
@@ -63,7 +63,7 @@ func (*Apple) MethodWithPointerReciverUnnamed(ctx context.Context, a int) (err e
 }
 
 func (Apple) MethodWithValueReciverUnnamed(ctx context.Context, a int) (err error) {
-	ctx, span := otel.Tracer("app").Start(ctx, "Apple.MethodWithValueReciverUnnamed")
+	ctx, span := otel.Tracer("app").Start(ctx, "example.Apple.MethodWithValueReciverUnnamed")
 	defer span.End()
 	defer func() {
 		if err != nil {
@@ -76,7 +76,7 @@ func (Apple) MethodWithValueReciverUnnamed(ctx context.Context, a int) (err erro
 }
 
 func Fib(ctx context.Context, n int) int {
-	ctx, span := otel.Tracer("app").Start(ctx, "Fib")
+	ctx, span := otel.Tracer("app").Start(ctx, "example..Fib")
 	defer span.End()
 
 	if n == 0 || n == 1 {
@@ -89,7 +89,7 @@ func Fib(ctx context.Context, n int) int {
 //instrument:include Basic
 
 func Basic(ctx context.Context) (err error) {
-	ctx, span := otel.Tracer("app").Start(ctx, "Basic")
+	ctx, span := otel.Tracer("app").Start(ctx, "example..Basic")
 	defer span.End()
 	defer func() {
 		if err != nil {
@@ -102,7 +102,7 @@ func Basic(ctx context.Context) (err error) {
 }
 
 func Comment(ctx context.Context) int {
-	ctx, span := otel.Tracer("app").Start(ctx, "Comment")
+	ctx, span := otel.Tracer("app").Start(ctx, "example..Comment")
 	defer span.End()
 
 	// some-comment first line
@@ -117,7 +117,7 @@ func SkipTwo(ctx context.Context) {
 }
 
 func WillNotSkipThree(ctx context.Context) {
-	ctx, span := otel.Tracer("app").Start(ctx, "WillNotSkipThree")
+	ctx, span := otel.Tracer("app").Start(ctx, "example..WillNotSkipThree")
 	defer span.End()
 	/* instrument:excluce SkipThree */
 }
@@ -132,7 +132,7 @@ func WillNotSkipThree(ctx context.Context) {
 
 // instrument:exclude WillNotSkipFour
 func WillNotSkipFour(ctx context.Context) {
-	ctx, span := otel.Tracer("app").Start(ctx, "WillNotSkipFour")
+	ctx, span := otel.Tracer("app").Start(ctx, "example..WillNotSkipFour")
 	defer span.End()
 }
 
@@ -156,7 +156,7 @@ func fib(n int) int {
 func OneLine(n int) int { return fib(n) }
 
 func OneLineTypical(ctx context.Context, n int) (int, error) {
-	ctx, span := otel.Tracer("app").Start(ctx, "OneLineTypical")
+	ctx, span := otel.Tracer("app").Start(ctx, "example..OneLineTypical")
 	defer span.End()
 	return fib(n), nil
 }
@@ -176,14 +176,14 @@ func MultipleContextMultipleErrorCollapsed(a, b context.Context) (erra, errob er
 }
 
 func MultipleErrorNotNamed(ctx context.Context) (error, error) {
-	ctx, span := otel.Tracer("app").Start(ctx, "MultipleErrorNotNamed")
+	ctx, span := otel.Tracer("app").Start(ctx, "example..MultipleErrorNotNamed")
 	defer span.End()
 
 	return nil, nil
 }
 
 func Closure(ctx context.Context) (int, error) {
-	ctx, span := otel.Tracer("app").Start(ctx, "Closure")
+	ctx, span := otel.Tracer("app").Start(ctx, "example..Closure")
 	defer span.End()
 
 	a := func(x int) (int, error) { return x + 1, nil }
